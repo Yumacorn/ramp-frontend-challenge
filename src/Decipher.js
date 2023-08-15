@@ -1,33 +1,34 @@
-const stick = document.getElementById("stick");
+import React, { useState, useEffect } from "react";
+import Loading from "./Loading";
+import "./styles.css";
 
-export default function Decipher(props) {
-  return (
-    <div>
-      <p id="stick"></p>
-      <Typewriter message={props.challengeUrl} />
-    </div>
-  );
-}
+const Decipher = ({ text, delay, placeholder, loaded }) => {
+  const [currentText, setCurrentText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(loaded);
+  let flagArray = [];
 
-const Typewriter = (props) => {
-  const arrTemp = [];
-  for (let i in props.message) {
-    arrTemp.push([props.message[i]].toString());
+  for (let i = 0; i < currentText.length; i++) {
+    flagArray.push(<li key={i}>{currentText[i]}</li>);
   }
 
-  // const listItems = arrTemp.map((x) => <li>{x}</li>);
-  RetrieveFlag(props.message);
+  useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setCurrentText((prevText) => prevText + text[currentIndex]);
+        setCurrentIndex((prevIndex) => prevIndex + 1);
+      }, delay);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, delay, text]);
+
+  return (
+    <div>
+      <Loading placeholder={placeholder} visible={isLoaded} />
+      {flagArray}
+    </div>
+  );
 };
 
-async function RetrieveFlag(url) {
-  const myRequest = new Request(url);
-  fetch(myRequest)
-    .then((response) => response.text())
-    .then((text) => {
-      console.log(text);
-      if (stick) {
-        stick.innerHTML = text;
-      }
-    });
-  console.log(url);
-}
+export default Decipher;
